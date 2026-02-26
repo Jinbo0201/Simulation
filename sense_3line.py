@@ -75,6 +75,7 @@ class SimControl(object):
     def stop_simulation(self):
         self.saveTraList()
         # self.cal_result()
+        print('仿真结束!!!')
 
     def appendTraList(self):
         if self.stepCounter % 10 == 0:
@@ -128,7 +129,7 @@ if __name__ == "__main__":
     
     sim1 = SimControl(3600, '1')
     sim1.start_simulation()
-    for i in range(360):
+    for i in range(3600):
         sim1.add_vehicle()
         sim1.step_simulation()
         sim1.show_simData()

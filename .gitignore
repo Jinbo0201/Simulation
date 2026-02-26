@@ -1,0 +1,8 @@
+# 编辑器配置（VS Code）
+.vscode/
+
+# 数据文件
+.idea/
+*.csv
+*.json
+*.xlsx  
