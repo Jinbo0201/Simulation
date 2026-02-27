@@ -42,13 +42,8 @@ class SimControl(object):
         # look for excel files inside a `docs` directory adjacent to this script
         docs_dir = os.path.join(current_dir, 'docs')
 
-        filePath = None
-        if self.simDirection == '1':
-            filePath = os.path.join(docs_dir, 'lineWZRC.xlsx')
-        elif self.simDirection == '0':
-            filePath = os.path.join(docs_dir, 'lineWZRC_0.xlsx')
-        else:
-            print('direction is wrong')
+        filePath = os.path.join(docs_dir, '3line.xlsx')
+
 
         if filePath and os.path.isfile(filePath):
             print("加载路网文件路径：", filePath)
@@ -108,15 +103,27 @@ class SimControl(object):
         flag = 36000/flow
 
         if self.stepCounter % flag == 0:
-            # self.sim2.addVehicle(self.simDirection)
-            beginNode, beginLaneNum, beginSpeed, targetNode, targetLaneNum, vehicleType = self.demand.addVehicle()
 
-            if self.rampMeterFlag and beginNode == 'node005':
-                print('匝道管控')
-            else:
-                self.vels.velList.append(Vehicle(beginNode, beginLaneNum, beginSpeed, targetNode, targetLaneNum, vehicleType))  # 输入车辆的函数
-                self.vels.velList[-1].targetEndPosition = self.vels.get_nodePosition(targetNode)
-                self.vels.velList[-1].x = self.vels.get_nodePosition(beginNode)
+            beginNode = 'node001'
+            beginLaneNum = 1
+            beginSpeed = random.randint(20, 30)
+            targetNode = 'node002'
+            targetLaneNum = random.randint(1, 2)
+            vehicleType = random.choice(['Car', 'Truck'])
+
+            self.vels.velList.append(Vehicle(beginNode, beginLaneNum, beginSpeed, targetNode, targetLaneNum, vehicleType))  # 输入车辆的函数
+            self.vels.velList[-1].targetEndPosition = 1200
+            self.vels.velList[-1].x = 0
+
+            # # self.sim2.addVehicle(self.simDirection)
+            # beginNode, beginLaneNum, beginSpeed, targetNode, targetLaneNum, vehicleType = self.demand.addVehicle()
+
+            # if self.rampMeterFlag and beginNode == 'node005':
+            #     print('匝道管控')
+            # else:
+            #     self.vels.velList.append(Vehicle(beginNode, beginLaneNum, beginSpeed, targetNode, targetLaneNum, vehicleType))  # 输入车辆的函数
+            #     self.vels.velList[-1].targetEndPosition = self.vels.get_nodePosition(targetNode)
+            #     self.vels.velList[-1].x = self.vels.get_nodePosition(beginNode)
     
     def show_simData(self):
         print('在途车辆:', len(self.vels.velList))
@@ -138,7 +145,7 @@ if __name__ == "__main__":
     
     sim1 = SimControl(3600, '1')
     sim1.start_simulation()
-    for i in range(3600):
+    for i in range(600):
         sim1.add_vehicle()
         sim1.step_simulation()
         sim1.show_simData()

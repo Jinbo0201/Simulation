@@ -292,7 +292,8 @@ class VehicleList(object):
         flagTargetLane = 0 < self.velList[i].targetLaneNum != self.velList[i].laneNum and self.velList[
             i].targetEndPosition - self.velList[i].x < self.changeLaneLength
         # 计算禁止驶入的车道
-        flagBanLane, idLaneBan = self.ide_laneBanFlag(i)
+        # flagBanLane, idLaneBan = self.ide_laneBanFlag(i)
+        flagBanLane = False
         id_front = self.get_idTargetLaneFront(self.velList[i].laneNum, i)
         # 计算是否低速行驶的标识
         flagLowSpeed = self.cal_speedFront(id_front) < self.velList[i].v_max - 5 and 0 < self.velList[id_front].x - \

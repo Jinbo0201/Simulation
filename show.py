@@ -1,6 +1,8 @@
 import sys
 import pandas as pd
 import pygame
+import os
+
 
 """Simple trajectory visualizer using pygame.
 
@@ -16,10 +18,17 @@ display.
 """
 
 def main():
+    # default to file in docs directory if no argument given
     if len(sys.argv) > 1:
         csv_path = sys.argv[1]
     else:
-        csv_path = "data_2026-02-26_15-27-18.csv"
+        csv_path = "data_2026-02-27_10-54-18.csv"
+
+    # ensure path is in docs
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    docs_dir = os.path.join(current_dir, 'docs')
+    if not os.path.isabs(csv_path):
+        csv_path = os.path.join(docs_dir, csv_path)
 
     try:
         df = pd.read_csv(csv_path)
@@ -35,28 +44,26 @@ def main():
     max_x = df["x"].max()
     lanes = int(df["laneNum"].max())
 
-    # We'll split the road (x range) into three segments and tile them
-    # vertically (top/middle/bottom).
-    segments = 3
-    # compute length of each logical segment
-    seg_length = max_x / segments if max_x > 0 else 0
+    # single segment display (no tiling)
+    segments = 1
+    # compute length of road
+    seg_length = max_x if max_x > 0 else 0
 
     # widen display and slightly reduce lane height
     screen_width = 1200
     lane_height = 30
-    # height of one segment containing all lanes
-    seg_height = lane_height * lanes
-    # total screen height needs room for all segments
-    screen_height = seg_height * segments + 40
-    # each segment spans the full width
+    # height of the display covering all lanes
+    screen_height = lane_height * lanes + 40
     seg_width = screen_width
-    # scale for converting x to pixels within a segment
+    # scale for converting x to pixels across the full road length
     scale = seg_width / seg_length if seg_length > 0 else 1
 
     pygame.init()
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption("车辆轨迹展示")
     clock = pygame.time.Clock()
+    # frames per second for the animation; lower values = slower
+    fps = 1
 
     times = sorted(df["simTime"].unique())
     # precompute min/max speeds for coloring
@@ -84,50 +91,30 @@ def main():
 
         # draw
         screen.fill((30, 30, 30))  # dark background
-        # draw lane areas for each segment stacked vertically
-        for seg in range(segments):
-            y_offset = seg * seg_height
-            for i in range(lanes):
-                lane_rect = pygame.Rect(0, y_offset + i * lane_height, seg_width, lane_height)
-                color = (50, 50, 50) if (i + seg) % 2 == 0 else (60, 60, 60)
-                pygame.draw.rect(screen, color, lane_rect)
-        # draw lane divider lines within each segment
-        for seg in range(segments):
-            y_offset = seg * seg_height
-            for i in range(lanes + 1):
-                y = y_offset + i * lane_height
-                pygame.draw.line(screen, (200, 200, 200), (0, y), (seg_width, y), 1)
-        # draw horizontal separators between segments (make them more visible)
-        for seg in range(1, segments):
-            y_sep = seg * seg_height
-            # draw a thick bright line
-            pygame.draw.line(screen, (255, 255, 255), (0, y_sep), (screen_width, y_sep), 4)
-            # optionally draw a faint darker band above and below for emphasis
-            band = 3
-            pygame.draw.line(screen, (100, 100, 100), (0, y_sep - band), (screen_width, y_sep - band), 1)
-            pygame.draw.line(screen, (100, 100, 100), (0, y_sep + band), (screen_width, y_sep + band), 1)
+        # draw lane areas across full height
+        for i in range(lanes):
+            lane_rect = pygame.Rect(0, i * lane_height, seg_width, lane_height)
+            color = (50, 50, 50) if i % 2 == 0 else (60, 60, 60)
+            pygame.draw.rect(screen, color, lane_rect)
+        # draw lane divider lines
+        for i in range(lanes + 1):
+            y = i * lane_height
+            pygame.draw.line(screen, (200, 200, 200), (0, y), (seg_width, y), 1)
         # draw vehicles with color based on speed
         for _, row in subset.iterrows():
-            # determine which segment the vehicle belongs to
-            seg = int(row["x"] / seg_length) if seg_length > 0 else 0
-            if seg >= segments:
-                seg = segments - 1
-            # pixel x within segment
-            local_x = row["x"] - seg * seg_length
-            x_pix = int(local_x * scale)
+            # pixel x calculated over full road
+            x_pix = int(row["x"] * scale)
             lane_idx = int(row["laneNum"] - 1)
-            # compute y offset for segment
-            y_offset = seg * seg_height
             # make vehicle even smaller
             veh_w = 4
             veh_h = int(lane_height * 0.3)
-            y_pix = y_offset + lane_idx * lane_height + (lane_height - veh_h) // 2
+            y_pix = lane_idx * lane_height + (lane_height - veh_h) // 2
             rect = pygame.Rect(x_pix, y_pix, veh_w, veh_h)
             color = speed_to_color(row["v"])
             pygame.draw.rect(screen, color, rect)
 
         pygame.display.flip()
-        clock.tick(10)
+        clock.tick(fps)
 
     pygame.quit()
 
