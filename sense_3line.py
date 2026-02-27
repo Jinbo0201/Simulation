@@ -4,9 +4,9 @@ import os
 import datetime
 import pandas as pd
 
-from demand import *
-from line import *
-from vehicle import VehicleList, Vehicle
+from src.demand import *
+from src.line import *
+from src.vehicle import VehicleList, Vehicle
 
 
 
@@ -39,15 +39,18 @@ class SimControl(object):
     def load_file(self):
         
         current_dir = os.path.dirname(os.path.abspath(__file__))
+        # look for excel files inside a `docs` directory adjacent to this script
+        docs_dir = os.path.join(current_dir, 'docs')
 
+        filePath = None
         if self.simDirection == '1':
-            filePath = os.path.join(current_dir, 'lineWZRC.xlsx')
+            filePath = os.path.join(docs_dir, 'lineWZRC.xlsx')
         elif self.simDirection == '0':
-            filePath = os.path.join(current_dir, 'lineWZRC_0.xlsx')
+            filePath = os.path.join(docs_dir, 'lineWZRC_0.xlsx')
         else:
             print('direction is wrong')
 
-        if filePath:
+        if filePath and os.path.isfile(filePath):
             print("加载路网文件路径：", filePath)
             self.flagOpenFile = 1
             # 初始化线路
@@ -89,9 +92,15 @@ class SimControl(object):
         timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
         file_name = f"data_{timestamp}.csv"
 
+        # ensure docs directory exists alongside this script
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        docs_dir = os.path.join(current_dir, 'docs')
+        os.makedirs(docs_dir, exist_ok=True)
+        full_path = os.path.join(docs_dir, file_name)
 
         self.traDF = pd.DataFrame(self.traList, columns=['simTime', 'id', 'x', 'laneNum', 'v', 'direction'])
-        self.traDF.to_csv(file_name, index=False)
+        self.traDF.to_csv(full_path, index=False)
+        print(f"轨迹数据已保存: {full_path}")
 
     def add_vehicle(self):
 

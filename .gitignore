@@ -1,6 +1,10 @@
 # 编辑器配置（VS Code）
 .vscode/
 
+# 其他文件
+*.pyc
+__pycache__/
+
 # 数据文件
 .idea/
 *.csv
