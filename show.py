@@ -22,7 +22,7 @@ def main():
     if len(sys.argv) > 1:
         csv_path = sys.argv[1]
     else:
-        csv_path = "data_2026-02-27_10-54-18.csv"
+        csv_path = "data_2026-02-28_10-43-42.csv"
 
     # ensure path is in docs
     current_dir = os.path.dirname(os.path.abspath(__file__))

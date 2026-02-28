@@ -16,24 +16,30 @@ class SimControl(object):
 
         # self.currentPath = os.getcwd()
 
+        # 仿真时长
         self.simDuration = simulationTime
+        # 仿真方向
         self.simDirection = simulationDirection
 
         # 仿真步进时长
         self.dt = 0.1
 
+        # 加载路网数据
         self.load_file()
-        self.demand = Demand(self.simDirection)
+
+        # self.demand = Demand(self.simDirection)
+
+        # 车辆列表
         self.vels = VehicleList(self.dt, self.line)
 
         # 仿真进程计数
         self.stepCounter = 0
-
+        # 轨迹列表
         self.traList = []
 
-        # 匝道管控信号
-        self.rampMeterFlag = 0
-        self.waitList = []
+        # # 匝道管控信号
+        # self.rampMeterFlag = 0
+        # self.waitList = []
 
     # 打开路网文件
     def load_file(self):
@@ -41,7 +47,6 @@ class SimControl(object):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         # look for excel files inside a `docs` directory adjacent to this script
         docs_dir = os.path.join(current_dir, 'docs')
-
         filePath = os.path.join(docs_dir, '3line.xlsx')
 
 
@@ -54,17 +59,18 @@ class SimControl(object):
         else:
             print("路网数据加载失败!!!")
 
+
     # 开始仿真跟踪
     def start_simulation(self):
         # if self.flagOpenFile * self.flagConnectFlow > 0:
         # 仿真
-
         print('仿真开启!!!')
         self.flagStartSim = True
 
         # self.sim2.start()
 
     def step_simulation(self):
+        self.add_vehicle()
         print('the simulation step is', self.stepCounter)
         self.vels.updateState()
         self.appendTraList()
@@ -82,7 +88,6 @@ class SimControl(object):
         # self.stepCounter += 1
 
     def saveTraList(self):
-
         now = datetime.datetime.now()
         timestamp = now.strftime("%Y-%m-%d_%H-%M-%S")
         file_name = f"data_{timestamp}.csv"
@@ -105,7 +110,7 @@ class SimControl(object):
         if self.stepCounter % flag == 0:
 
             beginNode = 'node001'
-            beginLaneNum = 1
+            beginLaneNum = random.randint(1, 3)
             beginSpeed = random.randint(20, 30)
             targetNode = 'node002'
             targetLaneNum = random.randint(1, 2)
@@ -129,24 +134,24 @@ class SimControl(object):
         print('在途车辆:', len(self.vels.velList))
 
 
-    def set_laneBan(self, laneBanDict):
-        self.line.set_laneBanWithInput(laneBanDict)
+    # def set_laneBan(self, laneBanDict):
+    #     self.line.set_laneBanWithInput(laneBanDict)
 
-    def set_VSL(self, variableSpeedLimit):
-        self.line.set_VSLWithInput(variableSpeedLimit)
+    # def set_VSL(self, variableSpeedLimit):
+    #     self.line.set_VSLWithInput(variableSpeedLimit)
 
-    def set_VLF(self, variableLaneFeasibility):
-        self.line.set_VLFWithInput(variableLaneFeasibility)
+    # def set_VLF(self, variableLaneFeasibility):
+    #     self.line.set_VLFWithInput(variableLaneFeasibility)
 
-    def set_RM(self, flag):
-        self.rampMeterFlag = flag
+    # def set_RM(self, flag):
+        # self.rampMeterFlag = flag
 
 if __name__ == "__main__":
     
     sim1 = SimControl(3600, '1')
     sim1.start_simulation()
     for i in range(600):
-        sim1.add_vehicle()
+        # sim1.add_vehicle()
         sim1.step_simulation()
         sim1.show_simData()
     sim1.stop_simulation()
