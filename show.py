@@ -66,17 +66,37 @@ def main():
     fps = 1
 
     times = sorted(df["simTime"].unique())
-    # precompute min/max speeds for coloring
+    # precompute min/max speeds for optional shading
     v_min = df["v"].min()
     v_max = df["v"].max()
-    def speed_to_color(v):
-        # map speed to a gradient from blue (slow) to red (fast)
+
+    # richer coloring: assign each vehicle a base color from a palette
+    palette = [
+        (255, 0, 0),     # red
+        (0, 255, 0),     # green
+        (0, 0, 255),     # blue
+        (255, 255, 0),   # yellow
+        (255, 0, 255),   # magenta
+        (0, 255, 255),   # cyan
+        (255, 165, 0),   # orange
+        (128, 0, 128),   # purple
+    ]
+    color_map = {}
+
+    def base_color_for_id(veh_id):
+        # pick the next color in the palette (wrap around)
+        if veh_id not in color_map:
+            color_map[veh_id] = palette[len(color_map) % len(palette)]
+        return color_map[veh_id]
+
+    def shade_color(color, v):
+        # optionally make the color lighter/darker based on speed
         if v_max == v_min:
-            return (0, 255, 0)
+            return color
         ratio = (v - v_min) / (v_max - v_min)
-        r = int(255 * ratio)
-        b = int(255 * (1 - ratio))
-        return (r, 0, b)
+        # interpolate between 50% and 150% brightness
+        factor = 0.5 + ratio
+        return tuple(max(0, min(255, int(c * factor))) for c in color)
 
     running = True
     for t in times:
@@ -110,7 +130,9 @@ def main():
             veh_h = int(lane_height * 0.3)
             y_pix = lane_idx * lane_height + (lane_height - veh_h) // 2
             rect = pygame.Rect(x_pix, y_pix, veh_w, veh_h)
-            color = speed_to_color(row["v"])
+            # choose a base color for the vehicle id, then shade by speed
+            base = base_color_for_id(row["id"])
+            color = shade_color(base, row["v"])
             pygame.draw.rect(screen, color, rect)
 
         pygame.display.flip()

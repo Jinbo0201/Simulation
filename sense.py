@@ -20,7 +20,6 @@ class SimControl(object):
         self.simDuration = simulationTime
         # 仿真方向
         self.simDirection = simulationDirection
-
         # 仿真步进时长
         self.dt = 0.1
 

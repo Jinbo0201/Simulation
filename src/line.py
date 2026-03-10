@@ -6,7 +6,7 @@ class Line(object):
     def __init__(self, filePath):
         self.dfNode = pd.read_excel(filePath, sheet_name='Node')
         self.dfEdge = pd.read_excel(filePath, sheet_name='Edge')
-        self.dfDevice = pd.read_excel(filePath, sheet_name='Device')
+        # self.dfDevice = pd.read_excel(filePath, sheet_name='Device')
 
         # print(self.dfDevice)
 
@@ -51,3 +51,17 @@ class Line(object):
                 self.laneBan.loc[len(self.laneBan)] = [startPosition, self.lineLength, i+1]
 
 
+class Intersection(object):
+
+    def __init__(self, filePath):
+        self.dfNode = pd.read_excel(filePath, sheet_name='Node')
+        self.dfEdge = pd.read_excel(filePath, sheet_name='Edge')
+        self.dfDevice = pd.read_excel(filePath, sheet_name='Device')
+
+
+class TollStation(object):
+
+    def __init__(self, filePath):
+        self.dfNode = pd.read_excel(filePath, sheet_name='Node')
+        self.dfEdge = pd.read_excel(filePath, sheet_name='Edge')
+        self.dfDevice = pd.read_excel(filePath, sheet_name='Device')
